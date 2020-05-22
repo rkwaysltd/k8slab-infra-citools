@@ -8,6 +8,7 @@ build-all:
   - mkdir .docker
   - export DOCKER_CERT_PATH=$(pwd)/.docker
   - export DOCKER_HOST=tcp://docker-amd64:2376
+  - export DOCKER_TLS_VERIFY=1
   - echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
   - echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
   - echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
