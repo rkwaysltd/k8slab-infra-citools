@@ -1,16 +1,36 @@
 stages:
 - build
 
-build-all:
+.build:
   stage: build
   image: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
+  variables:
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: ${CI_PROJECT_DIR}/.docker
+    DOCKER_HOST: tcp://docker-${BUILD_ARCH}:2376
+    QBEC_VERSION: v0.11.0
+    QBEC_SHA256: fddf7fae84ba0bbdef343a86486a9bea406d644c5dc22e9724b0dd564534625d
+    KUBECTL_VERSION: v1.18.3
+    HELM_VERSION: v3.2.1
   script:
-  - mkdir .docker
-  - export DOCKER_CERT_PATH=$(pwd)/.docker
-  - export DOCKER_HOST=tcp://docker-amd64:2376
-  - export DOCKER_TLS_VERIFY=1
-  - echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
-  - echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
-  - echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
-  - docker version
+  - docker build -f Dockerfile --build-arg BUILD_ARCH --build-arg QBEC_VERSION --build-arg QBEC_SHA256 --build-arg KUBECTL_VERSION --build-arg KUBECTL_SHA265 --build-arg HELM_VERSION --build-arg HELM_SHA256 .
 
+build-amd64:
+  extends: .build
+  variables:
+    BUILD_ARCH: amd64
+    KUBECTL_SHA265: 6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
+    HELM_SHA256: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+
+build-arm64:
+  extends: .build
+  variables:
+    BUILD_ARCH: arm64
+    KUBECTL_SHA265: 6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
+    HELM_SHA256: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+
+before_script:
+- mkdir .docker
+- echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
+- echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
+- echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
