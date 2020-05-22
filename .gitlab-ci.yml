@@ -26,8 +26,8 @@ build-arm64:
   extends: .build
   variables:
     BUILD_ARCH: arm64
-    KUBECTL_SHA265: 6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
-    HELM_SHA256: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+    KUBECTL_SHA265: fc4479d1f7e58e6c8f40430a35f6b09b6f582909f69968e424fc20640ac45daf
+    HELM_SHA256: 7200fb4582345f521d56daed56112d667fef25c48569f574fab3f9cb04c5b176
 
 before_script:
 - mkdir .docker
