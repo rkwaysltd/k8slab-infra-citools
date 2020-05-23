@@ -52,6 +52,8 @@ push-amd64:
 
 test-amd64:
   image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
+  variables:
+    GIT_STRATEGY: none
   script:
   - echo Success.
 
