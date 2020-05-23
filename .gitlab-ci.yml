@@ -87,7 +87,6 @@ test:
       overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"nodeSelector\": { \"kubernetes.io/arch\": \"$arch\" }, \"imagePullSecrets\": [ { \"name\": \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" } ] } }"
       kubectl run \
         -i \
-        --tty \
         --restart=Never \
         -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}" \
         --limits=cpu=100m,memory=256Mi \
