@@ -54,7 +54,7 @@ push-amd64:
 test:
   stage: test
   image:
-    name: rancher/k3s:v1.17.5-k3s1@sha256:3025ecfa3c7c3a262a97435cb7c9c182d22b93d014bac767019d65bdce586786
+    name: ${UPSTREAM_K3S_IMAGE}
     entrypoint: [""]
   variables:
     GIT_STRATEGY: none
@@ -63,8 +63,8 @@ test:
       -i
       --tty
       --restart=Never
-      -l rkwaysltd.v1/prune-key-sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
-      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHA:?}-${CI_COMMIT_REF_NAME:?}
+      -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
       --image=busybox
       -- sh -c "echo Inside"
 
