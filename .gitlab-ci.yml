@@ -119,12 +119,18 @@ publish:
   variables:
     # Use arm64 docker daemon for publishing
     BUILD_ARCH: arm64
+  only:
+  - master
   script:
-  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
-  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
+  - docker login -u ${CI_REGISTRY_USER:?} -p ${CI_REGISTRY_PASSWORD:?} ${CI_REGISTRY:?}
+  - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-amd64
+  - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-arm64
   - docker manifest create ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64 --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
   - docker manifest push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+  - docker login -u ${PROJ_CI_DOCKERHUB_USER:?please set in Gitlab CI} -p ${PROJ_CI_DOCKERHUB_TOKEN:?please set in Gitlab CI} ${PROJ_CI_DOCKERHUB_REPO:?please set in Gitlab CI}
+  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+  - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} ${PROJ_CI_DOCKERHUB_REPO:?}:latest
+  - docker push ${PROJ_CI_DOCKERHUB_REPO:?}:latest
 
 before_script:
 - |
