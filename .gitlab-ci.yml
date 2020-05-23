@@ -2,6 +2,7 @@ stages:
 - build
 - push
 - test
+- test-cleanup
 
 variables:
   UPSTREAM_DOCKER_IMAGE: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
@@ -36,7 +37,6 @@ variables:
   image: ${UPSTREAM_DOCKER_IMAGE}
   script:
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
   - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH}
 
 build-amd64:
@@ -51,6 +51,16 @@ push-amd64:
   variables:
     BUILD_ARCH: amd64
 
+test-cleanup:
+  stage: test-cleanup
+  image:
+    name: ${UPSTREAM_K3S_IMAGE}
+    entrypoint: [""]
+  variables:
+    GIT_STRATEGY: none
+  script:
+  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+
 test:
   stage: test
   image:
@@ -59,24 +69,35 @@ test:
   variables:
     GIT_STRATEGY: none
   script:
+  - kubectl create secret docker-registry
+      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
+      --docker-server=${CI_REGISTRY:?}
+      --docker-username=${CI_REGISTRY_USER:?}
+      --docker-password=${CI_REGISTRY_PASSWORD:?}
+      --docker-email=${GITLAB_USER_EMAIL:?}
+  # no jq in k3s image so no piping into kubectl apply
+  - kubectl label secret
+      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
+      rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
   - |
     run_test() {
-      local arch
+      local arch overrides
       arch=${1:?run_test architecture_name}
+      overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"imagePullSecrets\": [ \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" ] } }"
       kubectl run \
         -i \
         --tty \
         --restart=Never \
         -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}" \
-        --limits='cpu=100m,memory=256Mi' \
-        --requests='cpu=100m,memory=256Mi' \
-        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
+        --limits=cpu=100m,memory=256Mi \
+        --requests=cpu=100m,memory=256Mi \
+        --overrides="$override" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
+        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
         -- sh -c "echo Inside"
     }
   - run_test amd64
   - run_test arm64
-  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
 
 build-arm64:
   extends: .build
