@@ -2,7 +2,6 @@ stages:
 - build
 - push
 - test
-- test-cleanup
 
 variables:
   UPSTREAM_DOCKER_IMAGE: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
@@ -52,18 +51,6 @@ push-amd64:
   variables:
     BUILD_ARCH: amd64
 
-test-cleanup:
-  stage: test-cleanup
-  image:
-    name: ${UPSTREAM_K3S_IMAGE}
-    entrypoint: [""]
-  variables:
-    GIT_STRATEGY: none
-  when: delayed
-  start_in: 10 minutes
-  script:
-  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
-
 test:
   stage: test
   image:
@@ -89,6 +76,7 @@ test:
     }
   - run_test amd64
   - run_test arm64
+  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
 
 build-arm64:
   extends: .build
