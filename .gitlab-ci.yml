@@ -51,11 +51,13 @@ push-amd64:
     BUILD_ARCH: amd64
 
 test-amd64:
-  image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
+  image:
+    name: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
+    entrypoint: [""]
   variables:
     GIT_STRATEGY: none
   script:
-  - echo Success.
+  - echo Success
 
 build-arm64:
   extends: .build
