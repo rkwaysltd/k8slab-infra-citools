@@ -27,6 +27,7 @@ RUN apk add --no-cache \
         c=$(cat /tmp/kubectl | sha256sum | cut -d ' ' -f1); \
         [ "$c" = "${KUBECTL_SHA265}" ] || { echo >&2 "KUBECTL_SHA265 checksum mismatch"; exit 1; }; \
         install -o root -g root -m 0755 -t /usr/local/bin /tmp/kubectl \
+        rm -rf /tmp/kubectl \
     ) \
  && ( \
         curl -o /tmp/helm.tar.gz -Lf "https://get.helm.sh/helm-${HELM_VERSION}-linux-${BUILD_ARCH}.tar.gz"; \
@@ -34,6 +35,7 @@ RUN apk add --no-cache \
         [ "$c" = "${HELM_SHA256}" ] || { echo >&2 "HELM_SHA256 checksum mismatch"; exit 1; }; \
         tar -xf /tmp/helm.tar.gz -C /tmp; \
         install -o root -g root -m 0755 -t /usr/local/bin /tmp/linux-${BUILD_ARCH}/helm \
+        rm -rf /tmp/helm.tar.gz /tmp/linux-${BUILD_ARCH} \
     ) \
  && touch /usr/local/bin/citools-show-versions.sh \
  && chmod 0755 /usr/local/bin/citools-show-versions.sh \
