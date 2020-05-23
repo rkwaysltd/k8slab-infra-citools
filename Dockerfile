@@ -53,3 +53,7 @@ RUN apk add --no-cache \
     ) >> /usr/local/bin/citools-show-versions.sh \
  && echo "Tools versions:" \
  && /usr/local/bin/citools-show-versions.sh | tee .motd
+RUN addgroup -g 59999 -S nonroot && \
+    adduser -u 59999 -S nonroot -G nonroot
+WORKDIR /home/nonroot
+USER 59999:59999
