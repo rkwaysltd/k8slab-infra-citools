@@ -21,8 +21,8 @@ stages:
       --build-arg KUBECTL_SHA265 \
       --build-arg HELM_VERSION \
       --build-arg HELM_SHA256 \
-      ${PROJ_CI_DOCKERHUB_REPO:+--tag=${PROJ_CI_DOCKERHUB_REPO}:${CI_COMMIT_SHA}-${BUILD_ARCH} \
-      ${CI_REGISTRY_IMAGE:+--tag=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH} \
+      ${PROJ_CI_DOCKERHUB_REPO:+--tag=${PROJ_CI_DOCKERHUB_REPO}:${CI_COMMIT_SHA}-${BUILD_ARCH}} \
+      ${CI_REGISTRY_IMAGE:+--tag=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH}} \
       .
 
 build-amd64:
