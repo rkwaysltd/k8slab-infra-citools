@@ -132,4 +132,5 @@ before_script:
   echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
   echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
   echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
-  echo '{ "experimental": "enabled" }' > .docker/config.json
+  mkdir -p "${HOME:?}/.docker"
+  echo '{ "experimental": "enabled" }' > "$HOME/.docker/config.json"
