@@ -1,6 +1,7 @@
 stages:
 - build
 - push
+- test
 
 variables:
   UPSTREAM_DOCKER_IMAGE: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
@@ -48,6 +49,11 @@ push-amd64:
   extends: .push
   variables:
     BUILD_ARCH: amd64
+
+test-amd64:
+  image: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
+  script:
+  - echo Success.
 
 build-arm64:
   extends: .build
