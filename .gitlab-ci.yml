@@ -2,6 +2,7 @@ stages:
 - build
 - push
 - test
+- publish
 - test-cleanup
 
 variables:
@@ -50,6 +51,18 @@ push-amd64:
   extends: .push
   variables:
     BUILD_ARCH: amd64
+
+build-arm64:
+  extends: .build
+  variables:
+    BUILD_ARCH: arm64
+    KUBECTL_SHA265: fc4479d1f7e58e6c8f40430a35f6b09b6f582909f69968e424fc20640ac45daf
+    HELM_SHA256: 7200fb4582345f521d56daed56112d667fef25c48569f574fab3f9cb04c5b176
+
+push-arm64:
+  extends: .push
+  variables:
+    BUILD_ARCH: arm64
 
 test-cleanup:
   stage: test-cleanup
@@ -100,17 +113,18 @@ test:
   - run_test amd64 /usr/local/bin/citools-show-versions.sh
   - run_test arm64 /usr/local/bin/citools-show-versions.sh
 
-build-arm64:
-  extends: .build
+publish:
+  stage: publish
+  image: ${UPSTREAM_DOCKER_IMAGE}
   variables:
+    # Use arm64 docker daemon for publishing
     BUILD_ARCH: arm64
-    KUBECTL_SHA265: fc4479d1f7e58e6c8f40430a35f6b09b6f582909f69968e424fc20640ac45daf
-    HELM_SHA256: 7200fb4582345f521d56daed56112d667fef25c48569f574fab3f9cb04c5b176
-
-push-arm64:
-  extends: .push
-  variables:
-    BUILD_ARCH: arm64
+  script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
+  - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
+  - docker manifest create ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64 --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
+  - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
 
 before_script:
 - |
