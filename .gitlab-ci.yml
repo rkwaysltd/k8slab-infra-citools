@@ -63,15 +63,15 @@ test:
     run_test() {
       local arch
       arch=${1:?run_test architecture_name}
-      kubectl run
-        -i
-        --tty
-        --restart=Never
-        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
-        --limits='cpu=100m,memory=256Mi'
-        --requests='cpu=100m,memory=256Mi'
-        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
-        --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch}
+      kubectl run \
+        -i \
+        --tty \
+        --restart=Never \
+        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}" \
+        --limits='cpu=100m,memory=256Mi' \
+        --requests='cpu=100m,memory=256Mi' \
+        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
+        --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         -- sh -c "echo Inside"
     }
   - run_test amd64
