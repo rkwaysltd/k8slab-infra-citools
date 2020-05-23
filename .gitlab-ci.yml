@@ -82,8 +82,9 @@ test:
       rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
   - |
     run_test() {
-      local arch overrides
-      arch=${1:?run_test architecture_name}
+      local arch overrides cmd
+      arch=${1:?run_test architecture_name command}
+      cmd=${2:?run_test architecture_name command}
       overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"nodeSelector\": { \"kubernetes.io/arch\": \"$arch\" }, \"imagePullSecrets\": [ { \"name\": \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" } ] } }"
       kubectl run \
         -i \
@@ -94,10 +95,10 @@ test:
         --overrides="$overrides" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
-        -- sh -c "/usr/local/bin/citools-show-versions.sh"
+        -- sh -c "$cmd"
     }
-  - run_test amd64
-  - run_test arm64
+  - run_test amd64 /usr/local/bin/citools-show-versions.sh
+  - run_test arm64 /usr/local/bin/citools-show-versions.sh
 
 build-arm64:
   extends: .build
