@@ -1,13 +1,17 @@
 stages:
 - build
+- push
+
+variables:
+  UPSTREAM_DOCKER_IMAGE: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
+  DOCKER_TLS_VERIFY: 1
+  DOCKER_CERT_PATH: ${CI_PROJECT_DIR}/.docker
+  DOCKER_HOST: tcp://docker-${BUILD_ARCH}:2376
 
 .build:
   stage: build
-  image: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
+  image: ${UPSTREAM_DOCKER_IMAGE}
   variables:
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_CERT_PATH: ${CI_PROJECT_DIR}/.docker
-    DOCKER_HOST: tcp://docker-${BUILD_ARCH}:2376
     QBEC_VERSION: v0.11.0
     QBEC_SHA256: fddf7fae84ba0bbdef343a86486a9bea406d644c5dc22e9724b0dd564534625d
     KUBECTL_VERSION: v1.18.3
@@ -25,6 +29,14 @@ stages:
       ${CI_REGISTRY_IMAGE:+--tag=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH}}
       .
 
+.push:
+  stage: push
+  image: ${UPSTREAM_DOCKER_IMAGE}
+  script:
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH}
+
 build-amd64:
   extends: .build
   variables:
@@ -32,12 +44,22 @@ build-amd64:
     KUBECTL_SHA265: 6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
     HELM_SHA256: 018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
 
+push-amd64:
+  extends: .push
+  variables:
+    BUILD_ARCH: amd64
+
 build-arm64:
   extends: .build
   variables:
     BUILD_ARCH: arm64
     KUBECTL_SHA265: fc4479d1f7e58e6c8f40430a35f6b09b6f582909f69968e424fc20640ac45daf
     HELM_SHA256: 7200fb4582345f521d56daed56112d667fef25c48569f574fab3f9cb04c5b176
+
+push-arm64:
+  extends: .push
+  variables:
+    BUILD_ARCH: arm64
 
 before_script:
 - mkdir .docker
