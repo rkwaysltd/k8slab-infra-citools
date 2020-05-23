@@ -58,6 +58,7 @@ test-cleanup:
     entrypoint: [""]
   variables:
     GIT_STRATEGY: none
+  when: always
   script:
   - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
 
