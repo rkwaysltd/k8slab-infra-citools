@@ -17,6 +17,8 @@ ARG KUBECTL_VERSION=v1.18.3
 ARG KUBECTL_SHA265=6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
 ARG HELM_VERSION=v3.2.1
 ARG HELM_SHA256=018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+COPY --from=qbec-builder /go/bin/qbec /usr/local/bin/qbec
+COPY --from=qbec-builder /go/bin/jsonnet-qbec /usr/local/bin/jsonnet-qbec
 RUN apk add --no-cache \
         docker-cli \
         jq curl git make \
@@ -32,18 +34,20 @@ RUN apk add --no-cache \
         [ "$c" = "${HELM_SHA256}" ] || { echo >&2 "HELM_SHA256 checksum mismatch"; exit 1; }; \
         tar -xf /tmp/helm.tar.gz -C /tmp; \
         install -o root -g root -m 0755 -t /usr/local/bin /tmp/linux-${BUILD_ARCH}/helm \
-    )
-COPY --from=qbec-builder /go/bin/qbec /usr/local/bin/qbec
-COPY --from=qbec-builder /go/bin/jsonnet-qbec /usr/local/bin/jsonnet-qbec
-RUN ( \
-        kubectl version --client | sed 's/^/kubectl: /'; \
-        qbec version | sed 's/^/qbec: /'; \
-        docker --version | sed 's/^/docker: /'; \
-        helm version | sed 's/^/helm: /'; \
-        jq --version | sed 's/^/jq: /'; \
-        curl --version | sed 's/^/curl: /'; \
-        git --version | sed 's/^/git: /'; \
-        make --version | sed 's/^/make: /'; \
-    ) > .motd \
+    ) \
+ && touch /usr/local/bin/citools-show-versions.sh \
+ && chmod 0755 /usr/local/bin/citools-show-versions.sh \
+ && ( \
+        echo "#!/bin/sh"; \
+        echo "set -eu"; \
+        echo "kubectl version --client | sed 's/^/kubectl: /'"; \
+        echo "qbec version | sed 's/^/qbec: /'"; \
+        echo "docker --version | sed 's/^/docker: /'"; \
+        echo "helm version | sed 's/^/helm: /'"; \
+        echo "jq --version | sed 's/^/jq: /'"; \
+        echo "curl --version | sed 's/^/curl: /'"; \
+        echo "git --version | sed 's/^/git: /'"; \
+        echo "make --version | sed 's/^/make: /'"; \
+    ) >> /usr/local/bin/citools-show-versions.sh \
  && echo "Tools versions:" \
- && cat .motd
+ && /usr/local/bin/citools-show-versions.sh | tee .motd

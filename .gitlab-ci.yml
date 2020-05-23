@@ -95,7 +95,7 @@ test:
         --overrides="$overrides" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
-        -- sh -c "echo Inside"
+        -- sh -c "/usr/local/bin/citools-show-versions.sh"
     }
   - run_test amd64
   - run_test arm64
