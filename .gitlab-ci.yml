@@ -126,15 +126,13 @@ publish:
   - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-amd64
   - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-arm64
   - docker manifest create ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64 --amend ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
-  - docker manifest annotate --arch amd64 --os=linux ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-amd64
-  - docker manifest annotate --arch arm64 --os=linux ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-arm64
   - docker manifest push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
   - docker login -u ${PROJ_CI_DOCKERHUB_USER:?please set in Gitlab CI} -p ${PROJ_CI_DOCKERHUB_TOKEN:?please set in Gitlab CI}
   - docker pull ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
   - docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} ${PROJ_CI_DOCKERHUB_REPO:?}:latest
   - 'test "${CI_COMMIT_TAG:-}" = "" || docker tag ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA} ${PROJ_CI_DOCKERHUB_REPO:?}:$CI_COMMIT_TAG'
-  - docker push ${PROJ_CI_DOCKERHUB_REPO:?}:latest
-  - 'test "${CI_COMMIT_TAG:-}" = "" || docker push ${PROJ_CI_DOCKERHUB_REPO:?}:$CI_COMMIT_TAG'
+  - docker manifest push ${PROJ_CI_DOCKERHUB_REPO:?}:latest
+  - 'test "${CI_COMMIT_TAG:-}" = "" || docker manifest push ${PROJ_CI_DOCKERHUB_REPO:?}:$CI_COMMIT_TAG'
 
 before_script:
 - |
