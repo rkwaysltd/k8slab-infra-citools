@@ -84,7 +84,7 @@ test:
     run_test() {
       local arch overrides
       arch=${1:?run_test architecture_name}
-      overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"imagePullSecrets\": [ \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" ] } }"
+      overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"imagePullSecrets\": [ { \"name\": \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" } ] } }"
       kubectl run \
         -i \
         --tty \
