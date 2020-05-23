@@ -91,7 +91,7 @@ test:
         -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}" \
         --limits=cpu=100m,memory=256Mi \
         --requests=cpu=100m,memory=256Mi \
-        --overrides="$override" \
+        --overrides="$overrides" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
         -- sh -c "echo Inside"
