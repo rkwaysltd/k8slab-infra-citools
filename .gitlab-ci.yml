@@ -72,14 +72,23 @@ test:
   variables:
     GIT_STRATEGY: none
   script:
-  - kubectl run
-      -i
-      --tty
-      --restart=Never
-      -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
-      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
-      --image=busybox
-      -- sh -c "echo Inside"
+  - |
+    run_test() {
+      local arch
+      arch=${1:?run_test architecture_name}
+      kubectl run
+        -i
+        --tty
+        --restart=Never
+        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+        --limits='cpu=100m,memory=256Mi'
+        --requests='cpu=100m,memory=256Mi'
+        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
+        --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch}
+        -- sh -c "echo Inside"
+    }
+  - run_test amd64
+  - run_test arm64
 
 build-arm64:
   extends: .build
@@ -94,7 +103,8 @@ push-arm64:
     BUILD_ARCH: arm64
 
 before_script:
-- mkdir .docker
-- echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
-- echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
-- echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
+- |
+  mkdir .docker
+  echo "${PROJ_CI_DOCKER_CA_CERT:?please set variable in Gitlab CI settings}" > .docker/ca.pem
+  echo "${PROJ_CI_DOCKER_CLIENT_CERT:?please set variable in Gitlab CI settings}" > .docker/cert.pem
+  echo "${PROJ_CI_DOCKER_CLIENT_KEY:?please set variable in Gitlab CI settings}" > .docker/key.pem
