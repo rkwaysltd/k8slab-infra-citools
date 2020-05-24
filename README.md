@@ -1,6 +1,24 @@
-# citools
+# Project k8slab-infra-citools
 
 Docker image with tools for building and deploying apps in k8slab cluster.
+
+# Description
+
+[Alpine Linux](https://alpinelinux.org/) image with following tools added:
+
+- [kubectl](https://kubernetes.io/)
+- [qbec](https://github.com/splunk/qbec) with jsonnet-qbec
+- [docker CLI](https://www.docker.com/)
+- [helm](https://helm.sh/)
+- curl
+- make
+- git
+- jq
+
+Supported architectures:
+
+- amd64
+- arm64
 
 # Docker Hub image
 
