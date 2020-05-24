@@ -4,7 +4,9 @@ Docker image with tools for building and deploying apps in k8slab cluster.
 
 # Docker Hub image
 
-Created image is published to public repository on hub.docker.com so it's widely available to all runners and CI pipelines.
+Created image is published to [public repository on
+hub.docker.com](https://hub.docker.com/r/rkwaysltd/citools) so it's widely
+available to all runners and CI pipelines.
 
 # Gitlab CI variables
 
