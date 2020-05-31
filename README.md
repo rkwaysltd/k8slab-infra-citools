@@ -8,6 +8,7 @@ Docker image with tools for building and deploying apps in k8slab cluster.
 
 - [kubectl](https://kubernetes.io/)
 - [qbec](https://github.com/splunk/qbec) with jsonnet-qbec
+- [jsonnet bundler (jb)](https://github.com/jsonnet-bundler/jsonnet-bundler)
 - [docker CLI](https://www.docker.com/)
 - [helm](https://helm.sh/)
 - curl

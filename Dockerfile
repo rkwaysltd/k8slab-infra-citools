@@ -17,6 +17,8 @@ ARG KUBECTL_VERSION=v1.18.3
 ARG KUBECTL_SHA265=6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
 ARG HELM_VERSION=v3.2.1
 ARG HELM_SHA256=018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+ARG JB_VERSION=v0.4.0
+ARG JB_SHA256=433edab5554a88a0371e11e93080408b225d41c31decf321c02b50d2e44993ce
 # Rarely changed labels
 LABEL maintainer="RKways LTD <rkwaysltd@gmail.com>" \
     org.opencontainers.image.title="citools" \
@@ -44,6 +46,13 @@ RUN apk add --no-cache \
         install -o root -g root -m 0755 -t /usr/local/bin /tmp/linux-${BUILD_ARCH}/helm; \
         rm -rf /tmp/helm.tar.gz /tmp/linux-${BUILD_ARCH}; \
     ) \
+ && ( \
+        curl -o /tmp/jb -Lf "https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/${JB_VERSION}/jb-linux-${BUILD_ARCH}"; \
+        c=$(cat /tmp/jb | sha256sum | cut -d ' ' -f1); \
+        [ "$c" = "${JB_SHA256}" ] || { echo >&2 "JB_SHA256 checksum mismatch"; exit 1; }; \
+        install -o root -g root -m 0755 -t /usr/local/bin /tmp/jb; \
+        rm -rf /tmp/jb; \
+    ) \
  && touch /usr/local/bin/citools-show-versions.sh \
  && chmod 0755 /usr/local/bin/citools-show-versions.sh \
  && ( \
@@ -51,6 +60,7 @@ RUN apk add --no-cache \
         echo "set -eu"; \
         echo "kubectl version --client | sed 's/^/kubectl: /'"; \
         echo "qbec version | sed 's/^/qbec: /'"; \
+        echo "jb --version 2>&1 | sed 's/^/jb: /'"; \
         echo "docker --version | sed 's/^/docker: /'"; \
         echo "helm version | sed 's/^/helm: /'"; \
         echo "jq --version | sed 's/^/jq: /'"; \
