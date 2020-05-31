@@ -76,7 +76,7 @@ test-cleanup:
     GIT_STRATEGY: none
   when: always
   script:
-  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
+  - kubectl delete pod,secret -l rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
 
 test:
   stage: test
@@ -95,7 +95,7 @@ test:
       --dry-run
       -o yaml
     | kubectl label --local -f -
-        rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
+        rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
         -o yaml
     | kubectl apply -f -
   - |
@@ -107,7 +107,7 @@ test:
       kubectl run \
         -i \
         --restart=Never \
-        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}" \
+        -l rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}" \
         --limits=cpu=100m,memory=256Mi \
         --requests=cpu=100m,memory=256Mi \
         --overrides="$overrides" \
