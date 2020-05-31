@@ -76,7 +76,7 @@ test-cleanup:
     GIT_STRATEGY: none
   when: always
   script:
-  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+  - kubectl delete pod,secret -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
 
 test:
   stage: test
@@ -87,7 +87,7 @@ test:
     GIT_STRATEGY: none
   script:
   - kubectl create secret docker-registry
-      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
+      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}
       --docker-server=${CI_REGISTRY:?}
       --docker-username=${CI_REGISTRY_USER:?}
       --docker-password=${CI_REGISTRY_PASSWORD:?}
@@ -95,7 +95,7 @@ test:
       --dry-run
       -o yaml
     | kubectl label --local -f -
-        rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+        rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
         -o yaml
     | kubectl apply -f -
   - |
@@ -103,16 +103,16 @@ test:
       local arch overrides cmd
       arch=${1:?run_test architecture_name command}
       cmd=${2:?run_test architecture_name command}
-      overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"nodeSelector\": { \"kubernetes.io/arch\": \"$arch\" }, \"imagePullSecrets\": [ { \"name\": \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}\" } ] } }"
+      overrides="{ \"apiVersion\": \"v1\", \"spec\": { \"nodeSelector\": { \"kubernetes.io/arch\": \"$arch\" }, \"imagePullSecrets\": [ { \"name\": \"${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}\" } ] } }"
       kubectl run \
         -i \
         --restart=Never \
-        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}" \
+        -l rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}" \
         --limits=cpu=100m,memory=256Mi \
         --requests=cpu=100m,memory=256Mi \
         --overrides="$overrides" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
-        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?} \
+        test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?} \
         -- sh -c "$cmd"
     }
   - run_test amd64 /usr/local/bin/citools-show-versions.sh
