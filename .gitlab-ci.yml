@@ -21,7 +21,10 @@ variables:
     KUBECTL_VERSION: v1.18.3
     HELM_VERSION: v3.2.1
   script:
+  - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
   - docker build -f Dockerfile
+      --build-arg BUILD_DATE
+      --build-arg REVISION=${CI_COMMIT_SHA:?}
       --build-arg BUILD_ARCH
       --build-arg QBEC_VERSION
       --build-arg QBEC_SHA256
