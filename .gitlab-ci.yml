@@ -21,7 +21,10 @@ variables:
     KUBECTL_VERSION: v1.18.3
     HELM_VERSION: v3.2.1
   script:
+  - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
   - docker build -f Dockerfile
+      --build-arg BUILD_DATE
+      --build-arg REVISION=${CI_COMMIT_SHA:?}
       --build-arg BUILD_ARCH
       --build-arg QBEC_VERSION
       --build-arg QBEC_SHA256
@@ -89,10 +92,12 @@ test:
       --docker-username=${CI_REGISTRY_USER:?}
       --docker-password=${CI_REGISTRY_PASSWORD:?}
       --docker-email=${GITLAB_USER_EMAIL:?}
-  # no jq in k3s image so no piping into kubectl apply
-  - kubectl label secret
-      ${CI_PROJECT_NAME:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}
-      rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+      --dry-run
+      -o yaml
+    | kubectl label --local -f -
+        rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+        -o yaml
+    | kubectl apply -f -
   - |
     run_test() {
       local arch overrides cmd

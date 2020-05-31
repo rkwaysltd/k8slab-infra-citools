@@ -17,6 +17,13 @@ ARG KUBECTL_VERSION=v1.18.3
 ARG KUBECTL_SHA265=6fcf70aae5bc64870c358fac153cdfdc93f55d8bae010741ecce06bb14c083ea
 ARG HELM_VERSION=v3.2.1
 ARG HELM_SHA256=018f9908cb950701a5d59e757653a790c66d8eda288625dbb185354ca6f41f6b
+# Rarely changed labels
+LABEL maintainer="RKways LTD <rkwaysltd@gmail.com>" \
+    org.opencontainers.image.title="citools" \
+    org.opencontainers.image.description="CI tools for rkwaysltd/k8slab cluster" \
+    org.opencontainers.image.url="https://github.com/rkwaysltd/k8slab-infra-citools" \
+    org.opencontainers.image.source="git@github.com:rkwaysltd/k8slab-infra-citools.git" \
+    org.opencontainers.image.vendor="RKways LTD"
 COPY --from=qbec-builder /go/bin/qbec /usr/local/bin/qbec
 COPY --from=qbec-builder /go/bin/jsonnet-qbec /usr/local/bin/jsonnet-qbec
 RUN apk add --no-cache \
@@ -57,3 +64,7 @@ RUN addgroup -g 59999 -S nonroot && \
     adduser -u 59999 -S nonroot -G nonroot
 WORKDIR /home/nonroot
 USER 59999:59999
+ARG BUILD_DATE
+ARG REVISION
+LABEL org.opencontainers.image.revision="$REVISION" \
+    org.opencontainers.image.created="$BUILD_DATE"
