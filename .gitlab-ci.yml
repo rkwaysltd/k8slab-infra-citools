@@ -94,9 +94,10 @@ test:
       --docker-email=${GITLAB_USER_EMAIL:?}
       --dry-run
       -o yaml
-      | kubectl label --local -f -
-      rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
-      | kubectl apply -f -
+    | kubectl label --local -f -
+        rkwaysltd.v1/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_NAME:?}"
+        -o yaml
+    | kubectl apply -f -
   - |
     run_test() {
       local arch overrides cmd
