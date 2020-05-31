@@ -2,8 +2,8 @@ stages:
 - build
 - push
 - test
-- publish
 - test-cleanup
+- publish
 
 variables:
   UPSTREAM_DOCKER_IMAGE: docker:19.03@sha256:b8a8caa37f283d18ca5a5066b7b79c95b401327061381df950712a585030043c
