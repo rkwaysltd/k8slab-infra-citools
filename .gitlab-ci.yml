@@ -10,7 +10,7 @@ variables:
   UPSTREAM_K3S_IMAGE: rancher/k3s:v1.17.5-k3s1@sha256:3025ecfa3c7c3a262a97435cb7c9c182d22b93d014bac767019d65bdce586786
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: ${CI_PROJECT_DIR}/.docker
-  DOCKER_HOST: tcp://docker-${BUILD_ARCH}:2376
+  DOCKER_HOST: tcp://docker-${BUILD_ARCH}.ci-docker:2376
 
 .build:
   stage: build
