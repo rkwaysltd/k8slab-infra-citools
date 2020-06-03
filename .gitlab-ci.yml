@@ -23,6 +23,8 @@ variables:
     JB_VERSION: v0.4.0
   script:
   - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+  # Workaround for https://github.com/cloudnativelabs/kube-router/issues/873
+  - "for i in 0 1 2 3 4 5 6 7 8 9; do docker version >/dev/null 2>&1 && break || { echo NetPols sometimes are slow to catch. Retrying.; sleep 5; }; done"
   - docker build -f Dockerfile
       --build-arg BUILD_DATE
       --build-arg REVISION=${CI_COMMIT_SHA:?}
@@ -43,6 +45,8 @@ variables:
   stage: push
   image: ${UPSTREAM_DOCKER_IMAGE}
   script:
+  # Workaround for https://github.com/cloudnativelabs/kube-router/issues/873
+  - "for i in 0 1 2 3 4 5 6 7 8 9; do docker version >/dev/null 2>&1 && break || { echo NetPols sometimes are slow to catch. Retrying.; sleep 5; }; done"
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - docker push ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${BUILD_ARCH}
 
@@ -133,6 +137,8 @@ publish:
   - master
   - tags
   script:
+  # Workaround for https://github.com/cloudnativelabs/kube-router/issues/873
+  - "for i in 0 1 2 3 4 5 6 7 8 9; do docker version >/dev/null 2>&1 && break || { echo NetPols sometimes are slow to catch. Retrying.; sleep 5; }; done"
   - docker login -u ${CI_REGISTRY_USER:?} -p ${CI_REGISTRY_PASSWORD:?} ${CI_REGISTRY:?}
   - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-amd64
   - docker pull ${CI_REGISTRY_IMAGE:?}:${CI_COMMIT_SHA:?}-arm64
