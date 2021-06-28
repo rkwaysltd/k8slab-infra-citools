@@ -107,7 +107,7 @@ test:
       --docker-username=${CI_REGISTRY_USER:?}
       --docker-password=${CI_REGISTRY_PASSWORD:?}
       --docker-email=${GITLAB_USER_EMAIL:?}
-      --dry-run
+      --dry-run=client
       -o yaml
     | kubectl label --local -f -
         rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
@@ -115,6 +115,7 @@ test:
     | kubectl apply -f -
   - |
     run_test() {
+      set -x
       local arch overrides cmd
       arch=${1:?run_test architecture_name command}
       cmd=${2:?run_test architecture_name command}
@@ -129,6 +130,7 @@ test:
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?} \
         -- sh -c "$cmd"
+      set +x
     }
   - run_test amd64 /usr/local/bin/citools-show-versions.sh
   - run_test arm64 /usr/local/bin/citools-show-versions.sh
