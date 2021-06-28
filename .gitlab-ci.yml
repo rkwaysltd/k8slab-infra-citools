@@ -11,8 +11,8 @@ stages:
 - publish
 
 variables:
-  UPSTREAM_DOCKER_IMAGE: docker:20.10.2@sha256:cc8b57b604b6d5fa6025e0a183aa2189982a2a30450ff1b0c1e911ece179c677
-  UPSTREAM_K3S_IMAGE: rancher/k3s:v1.19.5-k3s2@sha256:1dc206dc38b2f74c427d64dbe34bfac78034456f6aed04d52443ff88b3e1a77c
+  UPSTREAM_DOCKER_IMAGE: docker:20.10.7@sha256:bfc499cef26daa22da31b76be1752813a6921ee1fa1dd1f56d4fdf19c701d332
+  UPSTREAM_K3S_IMAGE: rancher/k3s:v1.21.2-k3s1@sha256:a467df2b1b49040d18fdd4925a25d36efb891c96fbf682154a55aed3157ea66f
   DOCKER_TLS_VERIFY: 1
   DOCKER_CERT_PATH: ${CI_PROJECT_DIR}/.docker
   DOCKER_HOST: tcp://docker-${BUILD_ARCH}.ci-docker:2376
@@ -21,10 +21,9 @@ variables:
   stage: build
   image: ${UPSTREAM_DOCKER_IMAGE}
   variables:
-    QBEC_VERSION: v0.13.4
-    QBEC_SHA256: 33a61c83ef14e1275c47660bb0f57d26b48d7432fcf2364383db0cad9c370bec
-    KUBECTL_VERSION: v1.20.2
-    HELM_VERSION: v3.5.0
+    QBEC_VERSION: v0.14.3
+    KUBECTL_VERSION: v1.21.2
+    HELM_VERSION: v3.6.1
     JB_VERSION: v0.4.0
   script:
   - BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
@@ -59,8 +58,9 @@ build-amd64:
   extends: .build
   variables:
     BUILD_ARCH: amd64
-    KUBECTL_SHA265: 2583b1c9fbfc5443a722fb04cf0cc83df18e45880a2cf1f6b52d9f595c5beb88
-    HELM_SHA256: 3fff0354d5fba4c73ebd5db59a59db72f8a5bbe1117a0b355b0c2983e98db95b
+    QBEC_SHA256: ec625cd9897456e871ab03e33eed857f23648603c17a94f917ea052bb6665efa
+    KUBECTL_SHA265: 55b982527d76934c2f119e70bf0d69831d3af4985f72bb87cd4924b1c7d528da
+    HELM_SHA256: c64f2c7b1d00c5328b164cea4bbd5e0752c103193037173c9eadea9d6a57eddb
     JB_SHA256: 433edab5554a88a0371e11e93080408b225d41c31decf321c02b50d2e44993ce
 
 push-amd64:
@@ -72,8 +72,9 @@ build-arm64:
   extends: .build
   variables:
     BUILD_ARCH: arm64
-    KUBECTL_SHA265: 37fdba9fcd43cafba11ac4f82692e41aca41b59f44fd968fd84c263d71af580f
-    HELM_SHA256: 87811b648ed9f4c84d3cb67bbea9b666bb7f6dd0ff6aca148b65f91058f73953
+    QBEC_SHA256: 5e9d3fdcf4e937f1e2e6431676dc4fbaa73d5d3dc03844e6be36aed510e35c96
+    KUBECTL_SHA265: 5753051ed464d0f1af05a3ca351577ba5680a332d5b2fa7738f287c8a40d81cf
+    HELM_SHA256: a044b370d1b6e65b7d8d0aa7da4d11e4f406ec5b56af3a2f5bec09eb00c290fc
     JB_SHA256: 4659df99f6e2f438811389571856c58060bd946885edc466ae982d14d806275b
 
 push-arm64:
@@ -106,7 +107,7 @@ test:
       --docker-username=${CI_REGISTRY_USER:?}
       --docker-password=${CI_REGISTRY_PASSWORD:?}
       --docker-email=${GITLAB_USER_EMAIL:?}
-      --dry-run
+      --dry-run=client
       -o yaml
     | kubectl label --local -f -
         rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}"
@@ -122,8 +123,6 @@ test:
         -i \
         --restart=Never \
         -l rkways.com/prune-key-8sha-ref="${CI_PROJECT_PATH_SLUG:?}-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?}" \
-        --limits=cpu=100m,memory=256Mi \
-        --requests=cpu=100m,memory=256Mi \
         --overrides="$overrides" \
         --image=${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}-${arch} \
         test-${CI_PROJECT_NAME:?}-$arch-${CI_COMMIT_SHORT_SHA:?}-${CI_COMMIT_REF_SLUG:?} \

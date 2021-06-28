@@ -1,22 +1,11 @@
-FROM golang:1.15.6-alpine3.12@sha256:49b4eac11640066bc72c74b70202478b7d431c7d8918e0973d6e4aeb8b3129d2 AS qbec-builder
-ARG QBEC_VERSION=v0.13.4
-ARG QBEC_SHA256=33a61c83ef14e1275c47660bb0f57d26b48d7432fcf2364383db0cad9c370bec
-RUN apk add --no-cache \
-        curl make git gcc libc-dev \
- && ( \
-        curl -o /tmp/qbec.tar.gz -Lf "https://github.com/splunk/qbec/archive/${QBEC_VERSION}.tar.gz"; \
-        c=$(cat /tmp/qbec.tar.gz | sha256sum | cut -d ' ' -f1); \
-        [ "$c" = "${QBEC_SHA256}" ] || { echo >&2 "QBEC_SHA256 checksum mismatch"; exit 1; }; \
-        tar -xf /tmp/qbec.tar.gz -C /tmp; \
-        cd /tmp/qbec-${QBEC_VERSION#v}; \
-        make get build; \
-    )
-FROM alpine:3.13.0@sha256:d9a7354e3845ea8466bb00b22224d9116b183e594527fb5b6c3d30bc01a20378
+FROM alpine:3.14.0@sha256:234cb88d3020898631af0ccbbcca9a66ae7306ecd30c9720690858c1b007d2a0
 ARG BUILD_ARCH=amd64
-ARG KUBECTL_VERSION=v1.20.2
-ARG KUBECTL_SHA265=2583b1c9fbfc5443a722fb04cf0cc83df18e45880a2cf1f6b52d9f595c5beb88
-ARG HELM_VERSION=v3.5.0
-ARG HELM_SHA256=3fff0354d5fba4c73ebd5db59a59db72f8a5bbe1117a0b355b0c2983e98db95b
+ARG QBEC_VERSION=v0.14.3
+ARG QBEC_SHA256=ec625cd9897456e871ab03e33eed857f23648603c17a94f917ea052bb6665efa
+ARG KUBECTL_VERSION=v1.21.2
+ARG KUBECTL_SHA265=55b982527d76934c2f119e70bf0d69831d3af4985f72bb87cd4924b1c7d528da
+ARG HELM_VERSION=v3.6.1
+ARG HELM_SHA256=c64f2c7b1d00c5328b164cea4bbd5e0752c103193037173c9eadea9d6a57eddb
 ARG JB_VERSION=v0.4.0
 ARG JB_SHA256=433edab5554a88a0371e11e93080408b225d41c31decf321c02b50d2e44993ce
 # Rarely changed labels
@@ -26,11 +15,19 @@ LABEL maintainer="RKways LTD <rkwaysltd@gmail.com>" \
     org.opencontainers.image.url="https://github.com/rkwaysltd/k8slab-infra-citools" \
     org.opencontainers.image.source="git@github.com:rkwaysltd/k8slab-infra-citools.git" \
     org.opencontainers.image.vendor="RKways LTD"
-COPY --from=qbec-builder /go/bin/qbec /usr/local/bin/qbec
-COPY --from=qbec-builder /go/bin/jsonnet-qbec /usr/local/bin/jsonnet-qbec
 RUN apk add --no-cache \
         docker-cli \
         jq curl git make \
+ && ( \
+        curl -o /tmp/qbec.tar.gz -Lf "https://github.com/splunk/qbec/releases/download/${QBEC_VERSION}/qbec-linux-${BUILD_ARCH}.tar.gz"; \
+        c=$(cat /tmp/qbec.tar.gz | sha256sum | cut -d ' ' -f1); \
+        [ "$c" = "${QBEC_SHA256}" ] || { echo >&2 "QBEC_SHA256 checksum mismatch"; exit 1; }; \
+        mkdir /tmp/qbec-linux-${BUILD_ARCH}; \
+        tar -xf /tmp/qbec.tar.gz -C /tmp/qbec-linux-${BUILD_ARCH}; \
+        install -o root -g root -m 0755 -t /usr/local/bin /tmp/qbec-linux-${BUILD_ARCH}/qbec; \
+        install -o root -g root -m 0755 -t /usr/local/bin /tmp/qbec-linux-${BUILD_ARCH}/jsonnet-qbec; \
+        rm -rf /tmp/qbec.tar.gz /tmp/qbec-linux-${BUILD_ARCH}; \
+    ) \
  && ( \
         curl -o /tmp/kubectl -Lf "https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/${BUILD_ARCH}/kubectl"; \
         c=$(cat /tmp/kubectl | sha256sum | cut -d ' ' -f1); \
